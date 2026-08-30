@@ -1,35 +1,43 @@
 # Shinikatame / Wired Links
 
-Monorepo com frontend SvelteKit para a landing page e API FastAPI para
-autenticação Discord e sessões PostgreSQL.
+Monorepo com frontend SvelteKit em `apps/web`, API FastAPI em `apps/api` e
+PostgreSQL local definido em `infrastructure/docker-compose.yml`.
+
+## Estrutura
+
+- `apps/web`: frontend e BFF SvelteKit.
+- `apps/api`: serviço FastAPI de autenticação Discord e sessões.
+- `infrastructure/docker-compose.yml`: somente o serviço PostgreSQL.
+- `docs/auth.md`: fluxo de autenticação entre as aplicações.
 
 ## Rodar o frontend
 
-Na raiz do projeto:
+A partir da raiz, entre no diretório do SvelteKit:
 
 ```bash
-npm install
+cd apps/web
+npm ci
 cp .env.example .env
 npm run dev
 ```
 
-Abra `http://localhost:5173`.
-
-Para produção:
+Abra `http://localhost:5173`. Os checks e a build também são executados em
+`apps/web`:
 
 ```bash
 npm run check
+npm run lint
 npm run build
 npm run preview
 ```
 
 ## Rodar API e banco local
 
-Em um segundo terminal:
+Em outro terminal, a partir da raiz, suba apenas o PostgreSQL:
 
 ```bash
-docker compose up -d postgres
-cd backend
+docker compose -f infrastructure/docker-compose.yml up -d postgres
+cd apps/api
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
@@ -37,25 +45,19 @@ cp .env.example .env
 uvicorn app.main:app --reload --port 8001
 ```
 
-No `.env` do frontend, use:
+A API ficará em `http://localhost:8001` e sua documentação em
+`http://localhost:8001/docs`. Para parar o banco, use na raiz:
 
-```dotenv
-AUTH_SERVICE_URL=http://localhost:8001/api
-AUTH_SESSION_SECRET=gere-um-segredo-longo-e-aleatorio
-COOKIE_SECURE=false
+```bash
+docker compose -f infrastructure/docker-compose.yml down
 ```
 
-O backend exige `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`,
-`DISCORD_REDIRECT_URI` e `DISCORD_ADMIN_IDS` no próprio
-`backend/.env`. A role `admin` só é atribuída a IDs presentes nessa lista.
+As variáveis de ambiente ficam em `apps/web/.env` e `apps/api/.env`; os modelos
+estão em `apps/web/.env.example` e `apps/api/.env.example`.
 
 ## Discord
 
-O arquivo `static/.well-known/discord` é publicado em:
-
-```text
-https://seu-dominio/.well-known/discord
-```
-
-Ele deve continuar sendo um arquivo de texto com o valor `dh=...`, sem HTML.
-Esse é o endereço para referenciar a conexão/verificação do Discord.
+A rota `apps/web/src/routes/.well-known/discord/+server.ts` publica
+`https://seu-dominio/.well-known/discord` como texto `dh=...`, sem HTML.
+O login usa os endpoints `/api/auth/*` do SvelteKit e o serviço FastAPI.
+O favicon permanece configurado em `apps/web/src/app.html`.

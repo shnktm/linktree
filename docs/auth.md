@@ -1,9 +1,10 @@
 # Autenticação
 
-O frontend roda na Vercel e usa um BFF SvelteKit para conversar com o serviço
-FastAPI na VPS. Configure `AUTH_SERVICE_URL` e `AUTH_SESSION_SECRET` como
-variáveis privadas na Vercel. A allowlist `DISCORD_ADMIN_IDS` fica somente no
-`.env` do backend e nunca é enviada ao navegador.
+O frontend em `apps/web` roda na Vercel e usa um BFF SvelteKit para conversar
+com a API FastAPI em `apps/api` (ou com a API hospedada na VPS). Configure
+`AUTH_SERVICE_URL` e `AUTH_SESSION_SECRET` em `apps/web/.env`. A allowlist
+`DISCORD_ADMIN_IDS` fica somente em `apps/api/.env` e nunca é enviada ao
+navegador.
 
 ## Fluxo
 
@@ -28,18 +29,18 @@ variáveis privadas na Vercel. A allowlist `DISCORD_ADMIN_IDS` fica somente no
    `SameSite=Lax`, assinado por `AUTH_SESSION_SECRET`. O token nunca vai para
    `localStorage`, HTML ou query string.
 5. `/admin` valida a sessão no servidor com `GET AUTH_SERVICE_URL/verify` e
-   usa a role calculada pelo backend a partir de `DISCORD_ADMIN_IDS`.
+   usa a role calculada pela API a partir de `DISCORD_ADMIN_IDS`.
 
 O serviço de referência atualmente documenta `/discord/redirect`, `/discord`,
 `/verify` e `/logout`, mas não expõe `/exchange`. Por isso o login permanece
-configurável até o backend VPS oferecer esse contrato BFF seguro; a aplicação
-não finge um login bem-sucedido.
+configurável até a API VPS oferecer esse contrato BFF seguro; a aplicação não
+finge um login bem-sucedido.
 
 ## Origens diferentes
 
-O navegador só acessa os endpoints `/api/auth/*` do frontend. Assim, o backend
-não precisa liberar CORS para o browser. As chamadas do BFF para a VPS são
-server-to-server. Se o fluxo for alterado para chamar a VPS diretamente,
+O navegador só acessa os endpoints `/api/auth/*` do frontend. Assim, a API não
+precisa liberar CORS para o browser. As chamadas do BFF para a VPS são
+server-to-server. Se o fluxo for alterado para chamar a API diretamente,
 configure CORS com a origem exata da Vercel, `credentials: true` e cookies
 compatíveis com `SameSite=None; Secure`; não use `*`.
 
@@ -48,7 +49,7 @@ compatíveis com `SameSite=None; Secure`; não use `*`.
 
 ## Verificação do Discord
 
-`src/routes/.well-known/discord/+server.ts` responde como texto em
+`apps/web/src/routes/.well-known/discord/+server.ts` responde como texto em
 `https://seu-dominio/.well-known/discord`. A rota retorna diretamente o valor
 `dh=...`; não altere o `content-type` para HTML, porque o Discord consulta
 exatamente esse caminho.

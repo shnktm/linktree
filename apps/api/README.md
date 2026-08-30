@@ -6,10 +6,10 @@ SvelteKit conversa com este serviço server-to-server através de
 
 ## Desenvolvimento local
 
-Na raiz do monorepo:
+Na raiz do monorepo, suba o PostgreSQL definido no Compose:
 
 ```bash
-docker compose up -d postgres
+docker compose -f infrastructure/docker-compose.yml up -d postgres
 cd apps/api
 python3 -m venv .venv
 source .venv/bin/activate
@@ -26,8 +26,9 @@ O serviço ficará em `http://localhost:8001`. A documentação OpenAPI está em
 1. Configure `DATABASE_URL`, credenciais do Discord e `DISCORD_ADMIN_IDS` no
    ambiente da VPS.
 2. Cadastre no Discord Developer Portal o valor de `DISCORD_REDIRECT_URI`.
-3. Execute `uvicorn app.main:app --host 127.0.0.1 --port 8001` atrás de HTTPS
-   e de um reverse proxy.
+3. A partir de `apps/api`, execute
+   `uvicorn app.main:app --host 127.0.0.1 --port 8001` atrás de HTTPS e de um
+   reverse proxy.
 4. Configure no frontend da Vercel `AUTH_SERVICE_URL` apontando para o prefixo
    `/api` do serviço.
 
