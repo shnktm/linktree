@@ -24,7 +24,7 @@
     },
     {
       label: 'RetroAchievements',
-      href: 'https://retroachievements.org/gameList.php?t=play',
+      href: 'https://retroachievements.org/user/Shinikatame',
     },
     { label: 'Steam', href: 'https://steamcommunity.com/id/shinikatame/' },
   ];
