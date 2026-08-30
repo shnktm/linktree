@@ -10,7 +10,7 @@ Na raiz do monorepo:
 
 ```bash
 docker compose up -d postgres
-cd backend
+cd apps/api
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
